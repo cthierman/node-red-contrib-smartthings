@@ -13,6 +13,7 @@ module.exports = function(RED) {
         this.device = config.device;
 
         this.currentStatus = 0;
+	this.currentDescription = "";
 
         this.reportStatus = function(original) {
             let msg = {
@@ -21,7 +22,8 @@ module.exports = function(RED) {
                     deviceId: this.device,
                     deviceType: "lock",
                     name: this.name,
-                    value: this.currentStatus
+                    value: this.currentStatus,
+		    description: this.currentDescription	
                 }
             };
 
@@ -38,12 +40,20 @@ module.exports = function(RED) {
             this.reportStatus();
         }
 
+	this.updateDescription = function(currentDescription) {
+	    this.currentDescription = currentDescription;
+	    this.reportStatus();
+	}
+
         if(this.conf && this.device){
             const callback  = (evt) => {
                 console.debug("LockDevice("+this.name+") Callback called");
                 console.debug(evt);
                 if(evt["name"] == "lock"){
                     this.updateStatus((evt["value"].toLowerCase() === "locked" ? 1 : 0));
+		    if ( evt["description"] ) {
+		    	this.updateDescription( evt["description"] );
+		    }
                 }
             }
 
